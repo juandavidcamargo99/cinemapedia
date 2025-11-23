@@ -5,6 +5,7 @@ import 'package:cinemapedia/domain/datasources/movies_datasource.dart';
 import 'package:cinemapedia/domain/entities/movie.dart';
 import 'package:cinemapedia/infraestructure/mappers/movie_mapper.dart';
 import 'package:cinemapedia/infraestructure/models/themoviedb/themoviedb_response.dart';
+import 'package:cinemapedia/infraestructure/models/themoviedb/movie_details.dart';
 
 class TheMovieDbDatasource extends MoviesDatasource {
   final dio = Dio(
@@ -45,7 +46,7 @@ class TheMovieDbDatasource extends MoviesDatasource {
     );
     return _jsonToMovies(response.data);
   }
-  
+
   @override
   Future<List<Movie>> getUpcoming({int page = 1}) async {
     final response = await dio.get(
@@ -54,7 +55,7 @@ class TheMovieDbDatasource extends MoviesDatasource {
     );
     return _jsonToMovies(response.data);
   }
-  
+
   @override
   Future<List<Movie>> getTopRated({int page = 1}) async {
     final response = await dio.get(
@@ -64,5 +65,13 @@ class TheMovieDbDatasource extends MoviesDatasource {
     return _jsonToMovies(response.data);
   }
 
-  
+  @override
+  Future<Movie> getMovieById({String id = 'no-id'}) async {
+    final response = await dio.get('/movie/$id');
+    if (response.statusCode != 200) throw Exception('Movie not found: $id');
+
+    final movieDetails = MovieDetails.fromJson(response.data);
+    final Movie movie = MovieMapper.moviesDetailsToEntity(movieDetails);
+    return movie;
+  }
 }
